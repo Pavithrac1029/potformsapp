@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "481037045909",
+    "project_id": "pot-forms-app",
+    "storage_bucket": "pot-forms-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481037045909:android:5e1ca1146089e677648b9c",
+        "android_client_info": {
+          "package_name": "com.potformsapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "481037045909-kql6mbs37ltsafsfo6nnmk0epocek6dn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkNrNRwMEiMrRWrl9nt7tmRYyShUZ7CK4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "481037045909-kql6mbs37ltsafsfo6nnmk0epocek6dn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
