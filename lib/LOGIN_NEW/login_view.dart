@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -7,13 +6,11 @@ import 'package:potformsapp/AuthService/authservice.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import '../COMMON_WIDGETS/custom_button.dart';
 import '../COMMON_WIDGETS/custom_text.dart';
 import '../customfields/custom_loader.dart';
 
 import 'login_view_controller.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Loginview extends StatefulWidget {
   const Loginview({Key? key}) : super(key: key);
@@ -180,36 +177,37 @@ class _LoginviewState extends State<Loginview> {
       ),
     );
   }
-
-  Future<void> verifyPhone(mobile) async {
-    final PhoneVerificationCompleted verified = (AuthCredential authResult) {
-      AuthService().signIn(authResult);
-    };
-    final PhoneVerificationFailed verificationfailed =
-        (FirebaseAuthException authException) {};
-    final PhoneCodeSent smsSent = (String verId, [int? forceResend]) {
-      setState(() {
-        this.verificationId = verId;
-        this.codeSent = true;
-      });
-    } as PhoneCodeSent;
-    final PhoneCodeAutoRetrievalTimeout autoTimeout = (String verId) {
-      setState(() {
-        this.verificationId = verId;
-      });
-    };
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: "+91${mobile}",
-        timeout: const Duration(seconds: 15),
-        verificationCompleted: verified,
-        verificationFailed: verificationfailed,
-        codeSent: smsSent,
-        codeAutoRetrievalTimeout: autoTimeout);
-  }
-
-  clearText() {
-    mobileController.clear();
-  }
 }
 
-class FirebaseMessaging {}
+//   Future<void> verifyPhone(mobile) async {
+//     final PhoneVerificationCompleted verified = (AuthCredential authResult) {
+//       AuthService().signIn(authResult);
+//     };
+//     final PhoneVerificationFailed verificationfailed =
+//         (FirebaseAuthException authException) {};
+//     final PhoneCodeSent smsSent = (String verId, [int? forceResend]) {
+//       setState(() {
+//         this.verificationId = verId;
+//         this.codeSent = true;
+//       });
+//     } as PhoneCodeSent;
+//     final PhoneCodeAutoRetrievalTimeout autoTimeout = (String verId) {
+//       setState(() {
+//         this.verificationId = verId;
+//       });
+//     };
+//     await FirebaseAuth.instance.verifyPhoneNumber(
+//         phoneNumber: "+91${mobile}",
+//         timeout: const Duration(seconds: 15),
+//         verificationCompleted: verified,
+//         verificationFailed: verificationfailed,
+//         codeSent: smsSent,
+//         codeAutoRetrievalTimeout: autoTimeout);
+//   }
+
+//   clearText() {
+//     mobileController.clear();
+//   }
+// }
+
+// class FirebaseMessaging {}

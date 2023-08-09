@@ -2,16 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-
+import 'package:file_picker/file_picker.dart';
+import 'package:potformsapp/BASE%20URL/api.dart';
 import 'package:potformsapp/FORMS_NEW/FORM_F/Form%20F.dart';
+import 'package:potformsapp/LOGIN_NEW/login_view_controller.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:open_file/open_file.dart';
-
-
 
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,17 +39,20 @@ class _formfsignaturepadState extends State<formfsignaturepad> {
   late AnimationController _controller;
 
   final GlobalKey<SfSignaturePadState> signatureGlobalKey = GlobalKey();
-  var UserName, sharedLOGINID;
+  var UserName,
+      EmpID,
+      updatesign,
+      employeedetailspostcode,
+      employeedetailspostmessage;
 
   @override
-  void initState() {
+  initState() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
     ]);
-
-    getId();
-
-    loginId();
+    Provider.of<LoginController>(context, listen: false).getEmployeeid();
+    EmpID = Provider.of<LoginController>(context, listen: false).EmployeeID;
+    print("eplllllid:${EmpID.toString()}");
 
     super.initState();
   }
@@ -195,26 +198,6 @@ class _formfsignaturepadState extends State<formfsignaturepad> {
     );
   }
 
-  loginId() async {
-    SharedPreferences preferences1 = await SharedPreferences.getInstance();
-    preferences1.getInt("LOGINID");
-    setState(() {
-      sharedLOGINID = preferences1.getInt("LOGINID");
-    });
-    print("---------------loginid:----------------");
-    Logger().w(sharedLOGINID);
-  }
-
-  getId() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.getInt("employeeId");
-    setState(() {
-      userId = preferences.getInt("employeeId");
-    });
-    print("----------line-----");
-    print("empid: $userId");
-  }
-
   handleClearButtonPressed() {
     signatureGlobalKey.currentState!.clear();
   }
@@ -228,51 +211,124 @@ class _formfsignaturepadState extends State<formfsignaturepad> {
     final data =
         await signatureGlobalKey.currentState!.toImage(pixelRatio: 3.0);
 
-    print(signatureGlobalKey.currentState);
-
     final bytes = await data.toByteData(format: ui.ImageByteFormat.png);
+    print("bytesss:$bytes");
     final Uint8List imageBytes =
         bytes!.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
+
+    print("uintbytes:$imageBytes");
     final String path = (await getApplicationSupportDirectory()).path;
-    final String fileName = '$path/Output.png';
+    final String fileName = '$path/Employeesign.png';
     final File file = File(fileName);
+    print("fileee:${file.path as String}");
+
+    updatesign = File(file.path as String);
+
     await file.writeAsBytes(imageBytes, flush: true);
 
-    String base64string = base64Encode(imageBytes);
+    String imageLink = file.path;
+    print("Image Link: $imageLink");
+
+    print("imageeebytes:$imageBytes");
+
+    //  String base64string = base64Encode(imageBytes);
 
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setString("Formfsignature", base64string);
+    //   preferences.setString("Formfsignature", base64string);
     print("formfsignaturepage:$Formfsign1");
 
     setState(() {
       sign.add(bytes);
-      print("-----------------sign---------------");
-      print(base64string);
-
-      Logger().wtf(base64string);
+ 
 
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
       ]);
     });
 
-    // var url = Uri.parse("${Baseurl().baseurl}${Baseurl().formfnormalpost}");
 
-    // Logger().e(url);
-
-    // var response = await http.post(url, body: <String, dynamic>{
-    //   "Witness_1_sign": base64string.toString(),
-    //   "id_f": userId.toString(),
-    //   "Login": sharedLOGINID.toString(),
-    // });
 
     if (bytes == null) return null;
     if (bytes != null) {
-      // Provider.of<CommonFunctions>(context, listen: false)
-      //     .getSigns1(givenBytes: base64string);
+      
+      signapiPost();
 
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => FormF(bytes: bytes)));
+    }
+  }
+
+  signapiPost() async {
+    var url = Uri.parse(
+        "${Provider.of<Baseurl>(context, listen: false).baseurl}${Baseurl().emplyeedetailspost}");
+    print("posurl:$url");
+    print(updatesign);
+
+    http.MultipartRequest request = new http.MultipartRequest(
+      'POST',
+      url,
+    );
+    request.headers.addAll({
+      'Content-Type': 'application/json',
+    });
+
+    request.fields['Emp_ID'] = EmpID.toString();
+
+    request.files.add(http.MultipartFile(
+        'sign', updatesign.readAsBytes().asStream(), updatesign.lengthSync(),
+        filename: updatesign.path.split("/").last));
+
+    var res = await request.send();
+
+    var response = await http.Response.fromStream(res);
+    var response1 = http.BaseResponse;
+
+    var decodeDetails = json.decode(response.body);
+    print("employeedetails:$decodeDetails");
+    employeedetailspostcode = decodeDetails['code'];
+    employeedetailspostmessage = decodeDetails['message'];
+
+    if (employeedetailspostcode == 200) {
+      final snackBar = SnackBar(
+        backgroundColor: Color(0xff213B68),
+        content:
+            Text("${employeedetailspostcode}:${employeedetailspostmessage}"),
+        duration: Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      if (mounted) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => FormF()));
+      }
+    } else if (employeedetailspostcode == 202) {
+      final snackBar = SnackBar(
+        backgroundColor: Color(0xff213B68),
+        content:
+            Text("${employeedetailspostcode}:${employeedetailspostmessage}"),
+        duration: Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } else {
+      final snackBar = SnackBar(
+        backgroundColor: Color(0xff213B68),
+        content:
+            Text("${employeedetailspostcode}:${employeedetailspostmessage}"),
+        duration: Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 }

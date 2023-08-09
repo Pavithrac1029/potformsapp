@@ -30,10 +30,10 @@ class _OTPscreenViewState extends State<OTPscreenView> {
   void initState() {
     super.initState();
 
-    Provider.of<MyAuthService>(context, listen: false).verifyOtp(
+   // Provider.of<MyAuthService>(context, listen: false).verifyOtp(
     
-        context: context,
-        phoneNumber: "+91${widget.givenMobileNUmber}");
+      //  context: context,
+      //  phoneNumber: "+91${widget.givenMobileNUmber}");
   }
 
   @override
